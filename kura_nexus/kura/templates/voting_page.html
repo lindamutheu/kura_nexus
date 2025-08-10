@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cast Your Vote</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .position-group { 
+            border-bottom: 2px solid #ccc; 
+            padding-bottom: 20px; 
+            margin-bottom: 20px; 
+        }
+        .candidate-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .candidate-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .candidate-item input[type="radio"] {
+            margin-right: 20px;
+        }
+        .candidate-info {
+            display: flex;
+            align-items: center;
+        }
+        .candidate-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+        .candidate-details {
+            flex-grow: 1;
+        }
+        .candidate-details h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .candidate-details p {
+            margin: 5px 0 0;
+            color: #666;
+        }
+        .selected {
+            border: 2px solid #007bff;
+            background-color: #eaf3ff;
+        }
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .submit-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .submit-button:hover {
+            background-color: #218838;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'voter-logout' %}" class="logout-btn">Logout</a>
+    <div class="container">
+        <h1>Welcome to the Polling Station, {{ user.first_name }}!</h1>
+        <p>Please select one candidate for each position and click 'Cast Vote'.</p> 
+        <form id="voting-form" method="post" action="{% url 'cast-vote' %}">
+            {% csrf_token %}
+            <h2>Your Vote</h2> 
+            {% for position in positions %}
+            <div class="position-group">
+                <h3>{{ position.name }}</h3>
+                <div class="candidates-list">
+                    {% for candidate in position.candidate_set.all %}
+                    <label for="candidate-{{ candidate.id }}" class="candidate-item">
+                        <input type="radio" id="candidate-{{ candidate.id }}" name="position-{{ position.id }}" value="{{ candidate.id }}" required>
+                        <div class="candidate-info">
+                            {% if candidate.profile_picture %}
+                                <img src="{{ candidate.profile_picture.url }}" alt="{{ candidate.name }}'s profile picture">
+                            {% else %}
+                                <img src="{% static 'images/default_profile.png' %}" alt="No image">
+                            {% endif %}
+                            <div class="candidate-details">
+                                <h3>{{ candidate.name }}</h3>
+                                <p>{{ candidate.bio }}</p>
+                            </div>
+                        </div>
+                    </label>
+                    {% empty %}
+                    <p>No candidates available for this position.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No positions or candidates are currently available.</p>
+            {% endfor %}  
+            <button type="submit" class="submit-button">Cast Vote</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('voting-form');
+        const messageDiv = document.getElementById('message');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Validate that one option is selected per position
+            const positionGroups = document.querySelectorAll('.position-group');
+            let allPositionsVoted = true;
+            positionGroups.forEach(group => {
+                const radios = group.querySelectorAll('input[type="radio"]');
+                const isChecked = Array.from(radios).some(radio => radio.checked);
+                if (!isChecked) {
+                    allPositionsVoted = false;
+                }
+            });
+
+            if (!allPositionsVoted) {
+                messageDiv.style.color = 'red';
+                messageDiv.innerText = 'Please select a candidate for every position.';
+                return;
+            }
+
+            // Correct fetch call to send form data
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                messageDiv.style.color = 'green';
+                messageDiv.innerText = data.detail;
+                setTimeout(() => {
+                    window.location.href = "{% url 'landing_page' %}"; 
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.style.color = 'red';
+                messageDiv.innerText = error.detail || 'An unexpected error occurred.';
+            });
+        });
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Polling System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .banner {
+            background-color: #007bff;
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .banner h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        .banner p {
+            margin: 0 0 20px 0;
+            font-size: 1.2em;
+        }
+        .banner a {
+            background-color: #ffffff;
+            color: #007bff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .banner a:hover {
+            background-color: #e2e6ea;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>Vote for Your Leaders!</h1>
+        <p>Your voice matters. Cast your vote now to elect the next university leaders.</p>
+        <a href="{% url 'voter-login' %}">Get started</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+django
+djangorestframework
+django-cors-headers
+drf-yasg
+celery
+redis
+django-environ
+psycopg2-binary
