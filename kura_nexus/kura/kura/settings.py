@@ -123,3 +123,4 @@ DEFAULT_FROM_EMAIL = 'davungana@gmail.com'
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
+
