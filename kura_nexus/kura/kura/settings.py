@@ -68,7 +68,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'kura_db',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': '1l0v3J3su5Chr1st!',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -115,8 +115,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@gmail.com'  # Use a safe email address
-EMAIL_HOST_PASSWORD = 'your_app_password' # Use an app password, not your main password
+EMAIL_HOST_USER = 'davungana@gmail.com'  # Use a safe email address
+EMAIL_HOST_PASSWORD = 'kyxw sxzn xijz dqlw' # Use an app password, not your main password
+DEFAULT_FROM_EMAIL = 'davungana@gmail.com'
 
 # REST Framework settings
 REST_FRAMEWORK = {

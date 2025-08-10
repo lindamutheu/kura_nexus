@@ -15,6 +15,7 @@ from django.db import transaction
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
 from .serializers import VoterSignupSerializer, VoterSerializer, CandidateSerializer, VoteSerializer 
+from django.core.mail import send_mail
 
 def landing_page(request):
     """
@@ -63,6 +64,15 @@ def cast_vote(request):
             voter.is_voted = True
             voter.save()
             
+# 💡 Send a thank-you email after successful voting
+            send_mail(
+                'Thank You for Voting!',
+                f'Hello {request.user.first_name},\n\nThank you for participating in the election. Your vote has been successfully recorded.',
+                'davungana@gmail.com', # Replace with your sender email
+                [request.user.email],
+                fail_silently=False,
+            )
+
             # 💡 Log out the user after the vote is successfully cast
             logout(request)
             
@@ -106,8 +116,17 @@ class VoterSignupView(APIView):
                 last_name=last_name,
                 student_id=student_id,
                 email=email
+            )         
+
+# 💡 Send a confirmation email to the voter
+            send_mail(
+                'Account Created Successfully!',
+                f'Hello {first_name},\n\nYour account for the online polling system has been created successfully. You can now log in to cast your vote.',
+                'davungana@gmail.com', # Replace with your sender email
+                [email],
+                fail_silently=False,
             )
-            
+
             return Response({'detail': 'Account created successfully. You can now log in.'}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
